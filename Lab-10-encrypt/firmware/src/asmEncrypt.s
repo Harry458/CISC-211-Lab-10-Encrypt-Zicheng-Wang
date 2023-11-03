@@ -66,6 +66,54 @@ asmEncrypt:
     
     /* YOUR asmEncrypt CODE BELOW THIS LINE! VVVVVVVVVVVVVVVVVVVVV  */
     
+   LDR r4, =cipherText   /* Load the address of the "cipherText" into register r4 */
+do:		       /* Loop*/
+    LDRB r5, [r0], 1   /* Load a byte from the memory address pointed to by r0(first char) into r5, and increment r0 by 1(check the next char)*/
+    CMP r5, 0          /* Compare the value in r5(char) with 0 */
+    BEQ done           /* Branch to the "done" label if r5(char) is equal to 0 */
+    CMP r5, 64         /* Compare the value in r5(char) with 64 */
+    BGT in_range_C     /* Branch to "in_range_C" if r5(char) is greater than 64 */
+outside_C:	       /* Braanc back if is outside of Uppercase aciss table*/
+    CMP r5, 96         /* Compare the value in r5(char) with 96 */
+    BGT in_range_L     /* Branch to "in_range_L" if r5(char) is greater than 96 */
+outside_L:	       /* Braanc back if is outside of Lowercase aciss table*/
+continus:
+    STRB r5, [r4], 1   /* Store the value in r5 to the memory address pointed to by r4, and increment r4 by 1 */
+    B do               /* Unconditional branch back to the "do" label */
+
+in_range_C:
+    CMP r5, 90         /* Compare the value in r5(char) with 90 */
+    BGT outside_C      /* Branch to "outside_C" if r5(char) is greater than 90 */
+    ADD r5, r5, r1     /* Add the value in r1(key value) to r5(char) */
+    CMP r5, 90         /* Compare the new value in r5(char) with 90 */
+    BGT overflow       /* Branch to "overflow" if the new value is greater than 90 */
+    B continus         /* Unconditional branch to "continus" to proceed with the loop */
+
+in_range_L:
+    CMP r5, 122        /* Compare the value in r5(char) with 122 */
+    BGT outside_L      /* Branch to "outside_L" if r5(char) is greater than 122 */
+    ADD r5, r5, r1     /* Add the value in r1(key value) to r5(char) */
+    CMP r5, 122        /* Compare the new value in r5(char) with 122 */
+    BGT overflow       /* Branch to "overflow" if the new value is greater than 122 */
+    B continus         /* Unconditional branch to "continus" to proceed with the loop */
+
+overflow:
+    SUB r5, r5, 26     /* Subtract 26 from r5(char) make it not overflow*/
+    B continus         /* Unconditional branch to "continus" to proceed with the loop */
+
+done:
+    STRB r5, [r4], 1   /* Store the final value in r5(char " ") to address of the "cipherText", and increment address by 1 */
+    LDR r0, =cipherText /* Reload the address of "cipherText" into r0 */
+
+	
+	
+    
+    
+    
+    
+    
+    
+    
     /* YOUR asmEncrypt CODE ABOVE THIS LINE! ^^^^^^^^^^^^^^^^^^^^^  */
 
     # restore the caller's registers, as required by the ARM calling convention
